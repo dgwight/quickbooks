@@ -11,7 +11,7 @@ router.get('/quickbooks', quickbooksAuth)
 router.get('/quickbooks/callback', quickbooksCallback)
 
 function home (req, res) {
-  res.send('Welcome to Nentry\'s API!')
+  res.send(`<h1>Welcome to Nentry\'s API!</h1><a href="/quickbooks">Connect to Quickbooks</a>`)
 }
 
 function quickbooksAuth (req, res, next) {
@@ -21,7 +21,7 @@ function quickbooksAuth (req, res, next) {
   })().catch(next)
 }
 
-function quickbooksCallback (req, res, next) {
+function quickbooksCallback (req, res) {
   (async () => {
     const token = await QuickBooks.authorize(req.url)
     const realmId = req.query.realmId
@@ -57,7 +57,10 @@ function quickbooksCallback (req, res, next) {
       await user.save()
     }
     return res.redirect(`${process.env.API_URL}#success`)
-  })().catch(next)
+  })().catch(err => {
+    console.error(err)
+    return res.redirect(`${process.env.API_URL}#failed`)
+  })
 }
 
 module.exports = router

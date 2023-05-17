@@ -21,16 +21,9 @@ function getAuthUrl () {
 }
 
 function authorize (url) {
-  return oauthClient
-    .createToken(url)
-    .then(function (authResponse) {
-      return authResponse.getJson()
-    })
-    .catch(function (e) {
-      console.error('The error message is :' + e.originalMessage)
-      console.error(e.intuit_tid)
-      console.error(e)
-    })
+  return oauthClient.createToken(url).then(function (authResponse) {
+    return authResponse.getJson()
+  })
 }
 
 function getUserInfo (token) {
