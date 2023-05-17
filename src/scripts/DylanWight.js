@@ -28,7 +28,7 @@ async function report () {
 async function query () {
   const user = await User.findOne({ email: 'dylan@nentry.com' })
   const workspace = await Workspace.findOne({ user: user._id })
-  const query = 'select * from Purchase maxresults 5'
+  const query = 'select * from Purchase where TotalAmt > \'100.00\''
   const result = await QuickBooks.query(query, workspace)
-  console.log(result)
+  console.log(first(result.Purchase))
 }

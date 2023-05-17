@@ -45,7 +45,7 @@ function getUserInfo (token) {
 async function query (q, workspace) {
   await refresh(workspace)
   return oauthClient.makeApiCall({
-    url: `${baseUrl}/v3/company/${workspace.realmId}/query?query=${q}`,
+    url: `${baseUrl}/v3/company/${workspace.realmId}/query?query=${encodeURIComponent(q)}`,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
