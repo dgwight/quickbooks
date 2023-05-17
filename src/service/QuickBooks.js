@@ -3,9 +3,13 @@ const OAuthClient = require('intuit-oauth')
 const oauthClient = new OAuthClient({
   clientId: process.env.QUICKBOOKS_ID,
   clientSecret: process.env.QUICKBOOKS_SECRET,
-  environment: 'sandbox', // || 'production',
+  environment: process.env.QUICKBOOKS_ENV || 'sandbox',
   redirectUri: `${process.env.API_URL}/quickbooks/callback`
 })
+
+const baseUrl = process.env.QUICKBOOKS_ENV === 'production'
+  ? 'https://quickbooks.api.intuit.com'
+  : 'https://sandbox-quickbooks.api.intuit.com'
 
 function getAuthUrl () {
   return oauthClient.authorizeUri({
@@ -46,7 +50,7 @@ function query (q, token) {
   oauthClient.setToken(token)
   const reamId = '4620816365303552290'
   return oauthClient.makeApiCall({
-    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${reamId}/query?query=${q}`,
+    url: `${baseUrl}/v3/company/${reamId}/query?query=${q}`,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -62,7 +66,7 @@ function query (q, token) {
 function getWorkspaceInfo (reamId, token) {
   oauthClient.setToken(token)
   return oauthClient.makeApiCall({
-    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${reamId}/companyinfo/${reamId}`,
+    url: `${baseUrl}/v3/company/${reamId}/companyinfo/${reamId}`,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
