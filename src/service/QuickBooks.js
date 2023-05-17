@@ -32,18 +32,14 @@ function authorize (url) {
 
 function getUserInfo (token) {
   oauthClient.setToken(token)
-
-  return oauthClient
-    .getUserInfo()
-    .then(function (data) {
-      console.log('user  ' + data)
-      return data.getJson()
-    })
-    .catch(function (e) {
-      console.error('The error message is :' + e.originalMessage)
-      console.error(e.intuit_tid)
-      console.error(e)
-    })
+  return oauthClient.getUserInfo().then(function (data) {
+    console.log('user  ' + data)
+    return data.getJson()
+  }).catch(function (e) {
+    console.error('The error message is :' + e.originalMessage)
+    console.error(e.intuit_tid)
+    console.error(e)
+  })
 }
 
 function query (q, token) {
@@ -71,20 +67,28 @@ function getWorkspaceInfo (reamId, token) {
     headers: {
       'Content-Type': 'application/json'
     }
+  }).then(function (response) {
+    console.log(response)
+    return response.json.CompanyInfo
+  }).catch(function (e) {
+    console.log('The error is ' + JSON.stringify(e))
+    return e
   })
-    .then(function (response) {
-      console.log(response)
-      return response.json.CompanyInfo
-    })
-    .catch(function (e) {
-      console.log('The error is ' + JSON.stringify(e))
-      return e
-    })
+}
+
+function disconnect (token) {
+  return oauthClient.revoke(token).then(function (authResponse) {
+    console.log('Tokens revoked : ' + JSON.stringify(authResponse.getJson()))
+  }).catch(function (e) {
+    console.error('The error message is :' + e.originalMessage)
+    console.error(e.intuit_tid)
+  })
 }
 
 module.exports = {
   getAuthUrl,
   authorize,
+  disconnect,
   getUserInfo,
   query,
   getWorkspaceInfo
