@@ -14,8 +14,7 @@
     "lint": "eslint --fix --ext .js src test",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "mocha --timeout 120000 --exit",
-    "stripe": "stripe listen --forward-to localhost:8000/stripe --forward-connect-to localhost:8000/stripe/connect"
+    "test": "mocha --timeout 120000 --exit"
   },
   "dependencies": {
     "@pusher/push-notifications-server": "1.2.1",

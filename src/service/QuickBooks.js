@@ -1,4 +1,5 @@
 const OAuthClient = require('intuit-oauth')
+const { decrypt, encrypt } = require('../utils')
 
 const oauthClient = new OAuthClient({
   clientId: process.env.QUICKBOOKS_ID,
@@ -38,15 +39,13 @@ function getUserInfo (token) {
   }).catch(function (e) {
     console.error('The error message is :' + e.originalMessage)
     console.error(e.intuit_tid)
-    console.error(e)
   })
 }
 
-function query (q, token) {
-  oauthClient.setToken(token)
-  const reamId = '4620816365303552290'
+async function query (q, workspace) {
+  await refresh(workspace)
   return oauthClient.makeApiCall({
-    url: `${baseUrl}/v3/company/${reamId}/query?query=${q}`,
+    url: `${baseUrl}/v3/company/${workspace.realmId}/query?query=${q}`,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -54,7 +53,25 @@ function query (q, token) {
   }).then(function (response) {
     return response.json.QueryResponse
   }).catch(function (e) {
-    console.log('The error is ' + JSON.stringify(e))
+    console.error('The error message is :' + e.originalMessage)
+    console.error(e.intuit_tid)
+    return e
+  })
+}
+
+async function getReport (name, workspace) {
+  await refresh(workspace)
+  return oauthClient.makeApiCall({
+    url: `${baseUrl}/v3/company/${workspace.realmId}/reports/${name}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(function (response) {
+    return response.json
+  }).catch(function (e) {
+    console.error('The error message is :' + e.originalMessage)
+    console.error(e.intuit_tid)
     return e
   })
 }
@@ -71,7 +88,8 @@ function getWorkspaceInfo (reamId, token) {
     console.log(response)
     return response.json.CompanyInfo
   }).catch(function (e) {
-    console.log('The error is ' + JSON.stringify(e))
+    console.error('The error message is :' + e.originalMessage)
+    console.error(e.intuit_tid)
     return e
   })
 }
@@ -85,11 +103,21 @@ function disconnect (token) {
   })
 }
 
+async function refresh (workspace) {
+  const token = decrypt(workspace.quickbooksToken)
+  oauthClient.setToken(token)
+  const newToken = await oauthClient.refresh()
+  workspace.quickbooksToken = encrypt(newToken.json)
+  await workspace.save()
+}
+
 module.exports = {
   getAuthUrl,
   authorize,
   disconnect,
   getUserInfo,
   query,
-  getWorkspaceInfo
+  getWorkspaceInfo,
+  getReport,
+  refresh
 }
