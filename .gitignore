@@ -1,0 +1,21 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+.nuxt
+
+# Other
+.idea
+.run
+
+/.env
+/.env.production
+/.env.development
+/.nyc_output/
+/src/service/tmp/
+/repos/
+/.env.test
+/charge.js
+/.vscode/

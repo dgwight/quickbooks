@@ -1,0 +1,57 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: 'circleci/node:16'
+  environment:
+    NODE_OPTIONS: --max_old_space_size=4096
+
+deploy: &deploy
+  <<: *defaults
+  parameters:
+    stage:
+      type: string
+  steps:
+    - checkout
+    - attach_workspace:
+        at: ~/repo
+    - run:
+        name: Create release
+        command: ./node_modules/.bin/sentry-cli releases new ${CIRCLE_SHA1}
+    - run:
+        name: Test application
+        command: yarn test
+
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dev-dependencies-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install dependencies
+          command: |
+            yarn install --production=false
+      - save_cache:
+          paths:
+            - node_modules
+          key: dev-dependencies-{{ checksum "yarn.lock" }}
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - node_modules
+      - run:
+          name: Test
+          command: yarn test
+  deploy:
+    <<: *deploy
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - test:
+          context: development
